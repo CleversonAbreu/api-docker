@@ -66,7 +66,7 @@ class UserService
         try {
             $this->userRepository->delete($id);
             return response()->json([
-                'message' => ['message' => 'user deleted successfully'],
+                'message' => 'user deleted successfully',
             ], 200);
         } catch (\Exception $e) {
             $message = new ApiMessages($e->getMessage());

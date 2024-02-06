@@ -26,6 +26,10 @@ Route::prefix('v1')->namespace('App\Http\Controllers\Api')->group(function () {
 
     //new user
     Route::post('/users','UserController@store');
+    
+    //consult products
+    Route::get('/products','ProductController@index');
+    Route::get('/products/{id}','ProductController@show');
 
     //protected routes
     Route::group(['middleware'=>['jwt.auth']], function(){
@@ -34,15 +38,15 @@ Route::prefix('v1')->namespace('App\Http\Controllers\Api')->group(function () {
         Route::prefix('users')->group(function(){
             Route::get('/','UserController@index');
             Route::get('/{id}','UserController@show');
-            Route::post('/','UserController@store');
+            //Route::post('/','UserController@store');
             Route::put('/{id}','UserController@update');
             Route::delete('/{id}','UserController@destroy');
         });
 
         //products
         Route::prefix('products')->group(function(){
-            Route::get('/','ProductController@index');
-            Route::get('/{id}','ProductController@show');
+            //Route::get('/','ProductController@index');
+            //Route::get('/{id}','ProductController@show');
             Route::post('/','ProductController@store');
             Route::put('/{id}','ProductController@update');
             Route::delete('/{id}','ProductController@destroy');
@@ -50,25 +54,4 @@ Route::prefix('v1')->namespace('App\Http\Controllers\Api')->group(function () {
 
     });
 
-    // Route::group(['middleware' => ['jwt.auth']],function(){
-
-    // });
-
-    // //products
-    // Route::prefix('products')->group(function () {
-    //     Route::get('/', 'ProductController@index');
-    //     Route::get('/{id}', 'ProductController@show');
-    //     Route::post('/', 'ProductController@store');
-    //     Route::put('/{id}', 'ProductController@update');
-    //     Route::delete('/{id}', 'ProductController@destroy');
-    // });
-
-    // //users
-    // Route::prefix('users')->group(function () {
-    //     Route::get('/', 'UserController@index');
-    //     Route::get('/{id}', 'UserController@show');
-    //     Route::post('/', 'UserController@store');
-    //     Route::put('/{id}', 'UserController@update');
-    //     Route::delete('/{id}', 'UserController@destroy');
-    // });
 });
