@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -13,19 +14,27 @@ class ProductTest extends TestCase
 
     protected function token(): string
     {
+
+        User::create([
+            "name" => "Joao",
+            "email" => "joaoq@gmail.com",
+            "password" => bcrypt("123456")
+        ]);
+
         $data = [
-            "email" => "crehbatera2@gmail.com",
-            "password" => "password"
+            "email" => "joaoq@gmail.com",
+            "password" => "123456"
         ];
 
         $response = $this->json('POST', '/api/v1/login', $data);
+
         $content = json_decode($response->getContent());
 
-        if (!isset($content->data->token)) {
+        if (!isset($content->token)) {
             throw new RuntimeException('Token missing in response');
         }
 
-        return $content->data->token;
+        return $content->token;
     }
 
     public function test_can_create_product()
@@ -49,7 +58,7 @@ class ProductTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            // 'Authorization' => 'Bearer ' .  $this->token(),
+            'Authorization' => 'Bearer ' . $this->token(),
         ])->json('POST', '/api/v1/products', $data);
 
         $response->assertStatus(200)
@@ -79,7 +88,7 @@ class ProductTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            //   'Authorization' => 'Bearer ' .  $this->token(),
+            'Authorization' => 'Bearer ' .  $this->token(),
         ])->json('POST', '/api/v1/products', $data);
 
         $response->assertStatus(422)
@@ -120,7 +129,7 @@ class ProductTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            // 'Authorization' => 'Bearer ' .  $this->token(),
+            'Authorization' => 'Bearer ' . $this->token(),
         ])->json('GET', '/api/v1/products/5');
 
         $response->assertStatus(200)
@@ -153,7 +162,7 @@ class ProductTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            // 'Authorization' => 'Bearer ' .  $this->token(),
+            'Authorization' => 'Bearer ' . $this->token(),
         ])->json('PUT', '/api/v1/products/3', $data);
 
         $response->assertStatus(200)
@@ -165,15 +174,15 @@ class ProductTest extends TestCase
     {
 
         $resp = [
-            "message" => [
-                "message" => "product deleted successfully"
-            ]
+
+            "message" => "product deleted successfully"
+
         ];
 
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            //'Authorization' => 'Bearer ' .  $this->token(),
+            'Authorization' => 'Bearer ' . $this->token(),
         ])->json('DELETE', '/api/v1/products/1');
 
         $response->assertStatus(200)

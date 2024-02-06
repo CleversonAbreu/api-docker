@@ -13,19 +13,25 @@ class UserTest extends TestCase
 
     protected function token(): string
     {
+        User::create([
+            "name" => "Joao",
+            "email" => "joaoq@gmail.com",
+            "password" => bcrypt("123456")
+        ]);
+
         $data = [
-            "email" => "crehbatera2@gmail.com",
-            "password" => "password"
+            "email" => "joaoq@gmail.com",
+            "password" => "123456"
         ];
 
         $response = $this->json('POST', '/api/v1/login', $data);
         $content = json_decode($response->getContent());
 
-        if (!isset($content->data->token)) {
+        if (!isset($content->token)) {
             throw new RuntimeException('Token missing in response');
         }
 
-        return $content->data->token;
+        return $content->token;
     }
 
     public function test_can_create_user()
@@ -48,7 +54,7 @@ class UserTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            // 'Authorization' => 'Bearer ' .  $this->token(),
+           // 'Authorization' => 'Bearer ' . $this->token(),
         ])->json('POST', '/api/v1/users', $data);
 
         $response->assertStatus(200)
@@ -78,7 +84,7 @@ class UserTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            //   'Authorization' => 'Bearer ' .  $this->token(),
+            'Authorization' => 'Bearer ' . $this->token(),
         ])->json('POST', '/api/v1/users', $data);
 
         $response->assertStatus(422)
@@ -113,7 +119,7 @@ class UserTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            // 'Authorization' => 'Bearer ' .  $this->token(),
+            'Authorization' => 'Bearer ' . $this->token(),
         ])->json('GET', '/api/v1/users/1');
 
         $response->assertStatus(200)
@@ -145,7 +151,7 @@ class UserTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            // 'Authorization' => 'Bearer ' .  $this->token(),
+            'Authorization' => 'Bearer ' . $this->token(),
         ])->json('PUT', '/api/v1/users/3', $data);
 
         $response->assertStatus(200)
@@ -155,18 +161,16 @@ class UserTest extends TestCase
 
     public function test_can_delete_user()
     {
-
+     
         $resp = [
-            "message" => [
-                "message" => "user deleted successfully"
-            ]
+            "message" => "user deleted successfully"
         ];
 
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-            //'Authorization' => 'Bearer ' .  $this->token(),
-        ])->json('DELETE', '/api/v1/users/2');
+            'Authorization' => 'Bearer ' . $this->token(),
+        ])->json('DELETE', '/api/v1/users/1');
 
         $response->assertStatus(200)
             ->assertJson($resp);

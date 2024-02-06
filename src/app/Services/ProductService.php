@@ -66,7 +66,7 @@ class ProductService
         try {
             $this->productRepository->delete($id);
             return response()->json([
-                'message' => ['message' => 'product deleted successfully'],
+                'message' =>  'product deleted successfully',
             ], 200);
         } catch (\Exception $e) {
             $message = new ApiMessages($e->getMessage());
