@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\OtpController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +28,10 @@ Route::prefix('v1')->namespace('App\Http\Controllers\Api')->group(function () {
 
     //new user
     Route::post('/users','UserController@store');
+
+    //otp routes
+    Route::post('/otp/generate', [OtpController::class, 'generate']);
+    Route::post('/otp/validate', [OtpController::class, 'validateOtp']);
     
     //consult products
     Route::get('/products','ProductController@index');

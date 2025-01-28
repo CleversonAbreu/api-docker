@@ -39,4 +39,9 @@ class UserRepository
     {
         return $this->user->whereId($id)->delete();
     }
+
+    public function emailExists(string $email) : bool
+    {
+        return $this->user->where('email', $email)->exists();
+    }
 }

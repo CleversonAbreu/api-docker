@@ -73,4 +73,14 @@ class UserService
             return response()->json($message->getMessage(), 401);
         }
     }
+    public function verifyEmail(string $email): bool
+    {
+        // verify email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        // Verify email exists
+        return $this->userRepository->emailExists($email);
+    }
 }
