@@ -28,6 +28,7 @@ Route::prefix('v1')->namespace('App\Http\Controllers\Api')->group(function () {
 
     //new user
     Route::post('/users','UserController@store');
+    Route::post('/users/change-password','UserController@changePassword');
 
     //otp routes
     Route::post('/otp/generate', [OtpController::class, 'generate']);
