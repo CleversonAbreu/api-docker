@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Exceptions\OtpException\EmailNotFoundException;
 use App\Repositories\UserRepository;
+use App\Exceptions\CustomException;
 use Illuminate\Http\JsonResponse;
 use App\Api\ApiMessages;
 
@@ -61,6 +63,47 @@ class UserService
         }
     }
 
+    public function changePassword(array $user): JsonResponse
+    {
+        try {
+
+            // Validate 'email'
+            if (empty($user['email'])) {
+                throw new \InvalidArgumentException(__('messages.required_field', ['attribute' => 'email']));
+            }
+
+            // Validate 'newPassword'
+            if (empty($user['newPassword'])) {
+                throw new \InvalidArgumentException(__('messages.required_field', ['attribute' => 'newPassword']));
+            }
+
+            // Verify e-mail and check if exists
+            $verificationResult = $this->verifyEmail($user['email']);
+          
+            if (!$verificationResult) {
+                throw new EmailNotFoundException();
+            }
+
+            $this->userRepository->changePassword($user);  
+
+            return response()->json([
+                'message' => 'user updated successfully'
+                ,
+            ], 200);
+        } catch (\InvalidArgumentException $e) {
+            $message = new ApiMessages($e->getMessage());
+            return response()->json($message->getMessage(), 422);
+        } catch (CustomException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'error_type' => $e->getErrorType(),
+            ], $e->getCode());
+        } catch (\Exception $e) {
+            $message = new ApiMessages($e->getMessage(),);
+            return response()->json($message->getMessage(), $e->getCode() ?: 400);
+        }
+    }
+
     public function deleteUser(int $id): JsonResponse
     {
         try {
@@ -73,6 +116,7 @@ class UserService
             return response()->json($message->getMessage(), 401);
         }
     }
+
     public function verifyEmail(string $email): bool
     {
         // verify email format
