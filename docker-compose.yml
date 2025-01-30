@@ -29,8 +29,8 @@ services:
     environment:
       MYSQL_DATABASE: apidocker
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 'password'
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
       MYSQL_INITDB_SKIP_TZINFO: 1
       MYSQL_TIMEOUT: 28800  
     restart: always

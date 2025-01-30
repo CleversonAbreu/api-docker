@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\UserService;
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\JsonResponse;
-
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -47,6 +47,15 @@ class UserController extends Controller
         return $this->userService->updateUser($id,$request->all());
     }
 
+    /**
+     * change user password
+     */
+
+    public function changePassword(Request $request) : JsonResponse
+    {
+        return $this->userService->changePassword($request->all());
+    }
+    
     /**
      * Remove the specified resource from storage.
      */
