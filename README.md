@@ -21,3 +21,8 @@
 - open new terminal
 - cd api-docker/src
 - php artisan test
+
+## Best Practices 
+- Service Layer Pattern [  Models, Controllers, Services, Repositories]
+- Translations [ Portuguese and English ]
+- Containerization with Docker 

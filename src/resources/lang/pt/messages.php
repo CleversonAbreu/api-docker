@@ -3,6 +3,7 @@
 return [
     'required_field' => 'O campo :attribute é obrigatório.',
     'email_not_found' => 'Email não encontrado.',
+    'email_already_exists' => 'Email já cadastrado.',
     'otp_generated' => 'OTP gerado com sucesso.',
     'otp_code' => 'Seu código OTP',
     'otp_validated' => 'OTP validado com sucesso.',
