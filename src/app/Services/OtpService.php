@@ -50,7 +50,7 @@ class OtpService
                 throw new FailedToGenerateOtpException();
             }
     
-            // Substitua por:
+            // send otp
             if ($this->sendOtp($phoneOrEmail, $otpCode) === false) {
                 throw new FailedToSendOtpException();
             }
@@ -138,10 +138,10 @@ class OtpService
                 $message->to($phoneOrEmail)->subject($subject);
             });
     
-            return true; // Retorna sucesso
+            return true; 
         } catch (\Exception $e) {
             \Log::error('Failed to send OTP email: ' . $e->getMessage(), ['exception' => $e]);
-            return false; // Retorna falha
+            return false;
         }
     }
 
@@ -158,7 +158,7 @@ class OtpService
     {
         $emailExists = $this->userService->verifyEmail($phoneOrEmail);
 
-        match ($typeGenerate) {
+        match (strtoupper($typeGenerate)) {
             OtpTypeGenerate::CHANGE_PASSWORD => !$emailExists ? throw new EmailNotFoundException() : null,
             OtpTypeGenerate::SIGNUP => $emailExists ? throw new EmailAlreadyExistsException() : null,
             default => null

@@ -23,8 +23,21 @@ class UserRequest extends FormRequest
     {
         return [
             'name'=> 'required',
-            'email' => 'required',
-            'password' => 'required'
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'O nome é obrigatório.',
+            'name.min' => 'O nome deve ter no mínimo 3 caracteres.',
+            'email.required' => 'O e-mail é obrigatório.',
+            'email.email' => 'Insira um e-mail válido.',
+            'email.unique' => 'Este e-mail já está em uso.',
+            'password.required' => 'A senha é obrigatória.',
+            'password.min' => 'A senha deve ter no mínimo 8 caracteres.',
         ];
     }
 }
