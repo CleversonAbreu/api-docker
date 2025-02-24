@@ -54,7 +54,7 @@ class UserService
             $userUpdated = $this->userRepository->update($id, $user);
             return response()->json([
                 'message' => 'user updated successfully',
-                'data' => $userUpdated
+                'data' => $user
                 ,
             ], 200);
         } catch (\Exception $e) {
