@@ -26,3 +26,4 @@
 - Service Layer Pattern [  Models, Controllers, Services, Repositories]
 - Translations [ Portuguese and English ]
 - Containerization with Docker 
+- Feature Test [ Feature ]
