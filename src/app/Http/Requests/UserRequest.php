@@ -19,13 +19,21 @@ class UserRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+    
     public function rules(): array
     {
-        return [
-            'name'=> 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
+        $rules = [
+            'name' => 'required|string|min:3',
+            'email' => 'required|email|unique:users,email,' . $this->route('user'),
         ];
+    
+        if ($this->isMethod('post')) { 
+            $rules['password'] = 'required|string|min:8';
+        } elseif ($this->isMethod('put') || $this->isMethod('patch')) {
+            $rules['password'] = 'sometimes|string|min:8';
+        }
+    
+        return $rules;
     }
 
     public function messages(): array
