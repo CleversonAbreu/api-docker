@@ -27,3 +27,4 @@
 - Translations [ Portuguese and English ]
 - Containerization with Docker 
 - Feature Test [ Feature ]
+- Api Documentation [ Swagger ] http://localhost:8080/api/documentation
