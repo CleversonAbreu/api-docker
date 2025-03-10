@@ -21,3 +21,10 @@
 - open new terminal
 - cd api-docker/src
 - php artisan test
+
+## Best Practices
+
+- Containerization with Docker
+- Service Layer Pattern [  Models, Controllers, Services, Repositories]
+- Translations [ Portuguese and English ]
+- Swagger Documentation - http://localhost:8080/api/documentation/

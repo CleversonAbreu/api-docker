@@ -10,9 +10,11 @@ use Illuminate\Http\JsonResponse;
 use App\Services\UserService;
 use App\Exceptions\CustomException;
 use App\Exceptions\OtpException\EmailNotFoundException;
+use App\Exceptions\OtpException\EmailAlreadyExistsException;
 use App\Exceptions\OtpException\FailedToGenerateOtpException;
 use App\Exceptions\OtpException\FailedToSendOtpException;
 use App\Exceptions\OtpException\InvalidOtpException;
+use App\Constants\OtpTypeGenerate;
 
 class OtpService
 {
@@ -37,11 +39,10 @@ class OtpService
     
             // Verify e-mail and check if exists
             $verificationResult = $this->userService->verifyEmail($phoneOrEmail);
-    
-            if (!$verificationResult) {
-                throw new EmailNotFoundException();
-            }
-    
+            
+            // Validate type_validate
+            $this->validateEmailBasedOnType($phoneOrEmail, $input['type_generate'] ?? null);
+        
             // Create and save OTP
             $otpCode = $this->createAndSaveOtp($phoneOrEmail);
     
@@ -49,8 +50,8 @@ class OtpService
                 throw new FailedToGenerateOtpException();
             }
     
-            // Send OTP (e-mail or SMS)
-            if (!$this->sendOtp($phoneOrEmail, $otpCode)) {
+            // send otp
+            if ($this->sendOtp($phoneOrEmail, $otpCode) === false) {
                 throw new FailedToSendOtpException();
             }
     
@@ -77,16 +78,11 @@ class OtpService
     public function validateOtp(array $input): JsonResponse
     {
         try {
-            // Validate 'phone_or_email'
-            if (empty($input['phone_or_email'])) {
-                throw new \InvalidArgumentException(__('messages.required_field', ['attribute' => 'phone_or_email']));
-            }
+       
+            // Validate 'phone_or_email' and 'otp_code'
+            $this->validateInput($input, ['phone_or_email', 'otp_code']);
 
-            // Validate 'otp_code'
-            if (empty($input['otp_code'])) {
-                throw new \InvalidArgumentException(__('messages.required_field', ['attribute' => 'otp_code']));
-            }
-
+     
             // Find valid OTP in database
             $otp = $this->otpRepository->findValidOtp($input['phone_or_email'], $input['otp_code']);
 
@@ -128,25 +124,45 @@ class OtpService
         return $otpCode;
     }
 
-    protected function sendOtp($phoneOrEmail, $otpCode): bool
+    protected function sendOtp(string $phoneOrEmail, string $otpCode): bool
     {
         try {
-            if (filter_var($phoneOrEmail, FILTER_VALIDATE_EMAIL)) {
-                $subject = __('messages.otp_subject');
-                $body = __('messages.otp_body', ['otpCode' => $otpCode]);
-    
-                // Send e-mail
-                Mail::raw($body, function ($message) use ($phoneOrEmail, $subject) {
-                    $message->to($phoneOrEmail)->subject($subject);
-                });
-    
-                return true; 
-            } else {
-                return false; 
+            if (!filter_var($phoneOrEmail, FILTER_VALIDATE_EMAIL)) {
+                throw new FailedToSendOtpException();
             }
+    
+            $subject = __('messages.otp_subject');
+            $body = __('messages.otp_body', ['otpCode' => $otpCode]);
+    
+            Mail::raw($body, function ($message) use ($phoneOrEmail, $subject) {
+                $message->to($phoneOrEmail)->subject($subject);
+            });
+    
+            return true; 
         } catch (\Exception $e) {
-            return false; 
+            \Log::error('Failed to send OTP email: ' . $e->getMessage(), ['exception' => $e]);
+            return false;
         }
     }
-    
+
+    protected function validateInput(array $input, array $requiredFields): void
+    {
+        foreach ($requiredFields as $field) {
+            if (empty($input[$field])) {
+                throw new \InvalidArgumentException(__('messages.required_field', ['attribute' => $field]));
+            }
+        }
+    }
+
+    protected function validateEmailBasedOnType(string $phoneOrEmail, ?string $typeGenerate): void
+    {
+        $emailExists = $this->userService->verifyEmail($phoneOrEmail);
+
+        match (strtoupper($typeGenerate)) {
+            OtpTypeGenerate::CHANGE_PASSWORD => !$emailExists ? throw new EmailNotFoundException() : null,
+            OtpTypeGenerate::SIGNUP => $emailExists ? throw new EmailAlreadyExistsException() : null,
+            default => null
+        };
+    }
+
 }

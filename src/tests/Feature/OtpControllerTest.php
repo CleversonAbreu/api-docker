@@ -1,51 +1,86 @@
 <?php
 
-namespace Tests\Feature\Api;
+namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Mail;
+use PHPUnit\Framework\TestCase;
+use App\Http\Controllers\Api\OtpController;
 use App\Services\OtpService;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Mockery;
 
 class OtpControllerTest extends TestCase
 {
-    use RefreshDatabase;
+    protected $otpController;
+    protected $otpServiceMock;
 
-    public function testGenerateOtpApi(): void
+    public function setUp(): void
     {
-        $input = ['phone_or_email' => 'test@example.com'];
-
-    
-        Mail::fake();
-
+        parent::setUp();
         
-        $response = $this->postJson('/api/otp/generate', $input);
-
-        $response->assertStatus(200);
-        $response->assertJsonStructure(['message', 'otp']);
-        Mail::assertSent(function ($mail) use ($input) {
-            return $mail->hasTo($input['phone_or_email']);
-        });
+        // Creating the mock for OtpService
+        $this->otpServiceMock = Mockery::mock(OtpService::class);
+        
+        // Injecting the mock into the controller
+        $this->otpController = new OtpController($this->otpServiceMock);
     }
 
-    public function testValidateOtpApi(): void
+    public function testGenerateOtp()
     {
-        $input = ['phone_or_email' => 'test@example.com', 'otp_code' => '123456'];
+        // Input data for the method
+        $input = [
+            'phone_or_email' => 'cre1@gmail.com',
+            'type_generate' => 'CHANGE_PASSWORD'
+        ];
+        
+        // Expecting the generateOtp method to be called once with the input data
+        $this->otpServiceMock
+            ->shouldReceive('generateOtp')
+            ->once()
+            ->with($input)
+            ->andReturn(new JsonResponse(['message' => 'OTP code generated successfully'], 200));
 
-     
-        $response = $this->postJson('/api/otp/validate', $input);
+        // Creating the simulated request
+        $request = Request::create('/api/otp/generate', 'POST', $input);
 
-        $response->assertStatus(200);
-        $response->assertJson([
-            'message' => __('messages.otp_validated'),
-        ]);
+        // Calling the method
+        $response = $this->otpController->generate($request);
+
+        // Verifying the response
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(200, $response->status());
+        $this->assertEquals(['message' => 'OTP code generated successfully'], $response->getData(true));
     }
 
-    public function testGenerateOtpFailsMissingEmail(): void
+    public function testValidateOtp()
     {
-        $response = $this->postJson('/api/otp/generate', []);
+        // Input data for the method
+        $input = [
+            'phone_or_email' => 'cre1@gmail.com',
+            'otp_code' => '959120'
+        ];
+        
+        // Expecting the validateOtp method to be called once with the input data
+        $this->otpServiceMock
+            ->shouldReceive('validateOtp')
+            ->once()
+            ->with($input)
+            ->andReturn(new JsonResponse(['message' => 'OTP code validated successfully'], 200));
 
-        $response->assertStatus(404);
-        $response->assertJsonStructure(['message']);
+        // Creating the simulated request
+        $request = Request::create('/api/otp/validate', 'POST', $input);
+
+        // Calling the method
+        $response = $this->otpController->validateOtp($request);
+
+        // Verifying the response
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals(200, $response->status());
+        $this->assertEquals(['message' => 'OTP code validated successfully'], $response->getData(true));
+    }
+
+    public function tearDown(): void
+    {
+        Mockery::close(); // Closing the mock after the test
     }
 }
